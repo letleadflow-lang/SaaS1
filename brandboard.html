@@ -1,252 +1,394 @@
-
-<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Brandboard • AURA</title>
+  <title>AURA Brandboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600&family=Nunito:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .wave-container{position:relative;overflow:hidden;}
-    .wave-container canvas{width:100%!important;height:100%!important;display:block;}
-    
-    /* Modal overlay styles */
-    .modal-overlay {
+    body,
+    html {
+      font-family: 'Inter', sans-serif;
+      /* Keep Inter as primary */
+      background: #000;
+      /* Dark background for consistency */
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-size: 14px;
+      overflow-x: hidden;
+      /* Prevent horizontal scroll */
+    }
+
+    .font-heading {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 300;
+      letter-spacing: -0.05em;
+    }
+
+    #shader-canvas {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      position: relative;
-      background-color: #1f2937;
-      border: 1px solid #374151;
-      border-radius: 1rem;
-      padding: 2rem;
-      backdrop-filter: blur(8px);
-      max-width: 90%;
-      width: 400px;
-      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-    }
-    .modal-close-btn {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      color: #9ca3af;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    .toggle-link {
-      color: #06b6d4;
-      cursor: pointer;
-      text-decoration: underline;
-      margin-top: 1rem;
+      width: 100vw;
+      height: 100vh;
       display: block;
+      z-index: 0;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a2e4a 50%, #2e1a4a 100%);
+      /* Fallback if WebGL fails */
+    }
+
+    /* Styles for hero text and aurora effects from BookEase Pro (kept for consistency, though not all may be used) */
+    .hero-text {
+      background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 20%, #b3e5fc 40%, #81d4fa 60%, #4fc3f7 80%, #29b6f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 80px;
+      /* Adjust as needed */
+      line-height: 0.9;
+    }
+
+    .aurora-text {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 25%, #a855f7 50%, #ec4899 75%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Keeping float-icon, pulse-dot, phone-float, booking-card, aurora-border, aurora-glow for potential future use or if they are part of other elements */
+    .float-icon {
+      animation: float-gentle 3s ease-in-out infinite;
+    }
+
+    @keyframes float-gentle {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-3px);
+      }
+    }
+
+    .pulse-dot {
+      animation: pulse-aurora 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-aurora {
+
+      0%,
+      100% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+        box-shadow: 0 0 20px currentColor;
+      }
+    }
+
+    .phone-float {
+      animation: phone-hover 4s ease-in-out infinite;
+    }
+
+    @keyframes phone-hover {
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-10px) rotate(1deg);
+      }
+    }
+
+    .booking-card {
+      backdrop-filter: blur(12px);
+      background: rgba(79, 70, 229, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .aurora-border {
+      position: relative;
+      background: linear-gradient(45deg, #4f46e5, #7c3aed, #a855f7, #ec4899, #06b6d4);
+      padding: 2px;
+      border-radius: 24px;
+    }
+
+    .aurora-border>div {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a8a 100%);
+      border-radius: 22px;
+    }
+
+    .aurora-glow {
+      box-shadow: 0 0 40px rgba(79, 70, 229, 0.3), 0 0 80px rgba(124, 58, 237, 0.2);
+    }
+
+    @media (max-width: 1024px) {
+      .hero-text {
+        font-size: 64px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-text {
+        font-size: 48px;
+      }
+
+      .phone-float {
+        transform: scale(0.8);
+        /* Scale down phone on smaller screens */
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-text {
+        font-size: 40px;
+      }
+
+      .phone-float {
+        transform: scale(0.7);
+        /* Further scale down phone on mobile */
+      }
+    }
+
+    /* Custom styles for the step indicators */
+    .step-indicator.active {
+      background-color: #06b6d4;
+      /* Tailwind cyan-500 */
+      color: white;
+      font-weight: 600;
+    }
+
+    .step-indicator.completed {
+      background-color: #16a34a;
+      /* Tailwind green-600 */
+      color: white;
+    }
+
+    .step-indicator {
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
   </style>
 </head>
+
 <body class="font-['Inter'] bg-gray-900 overflow-x-hidden">
 
-  <!-- Floating Header -->
-  <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-30 flex bg-gray-800/60 border-gray-700/50 border rounded-full pt-3 pr-6 pb-3 pl-6 backdrop-blur-sm items-center">
-    <a href="homepage.html" class="text-xl font-medium text-white tracking-tighter hover:opacity-80 transition-opacity">AURA</a>
-    <div class="hidden md:flex ml-10 space-x-8 text-gray-300">
-      <a href="#" class="hover:text-white transition-colors">Features</a>
-      <a href="#" class="hover:text-white transition-colors">About</a>
-      <a href="#" class="hover:text-white transition-colors">Contact</a>
-    </div>
-    <div class="ml-auto flex items-center space-x-6">
-      <span id="loginStatus" class="text-gray-400 text-sm whitespace-nowrap ml-4">Loading...</span>
-      <button id="loginToggleButton" class="px-4 py-2 rounded-full bg-gradient-to-br from-pink-500 to-cyan-500 text-white text-sm font-medium hover:opacity-80 transition-opacity">
-        Login
-      </button>
-    </div>
-  </nav>
+  <!-- Animated Background -->
+  <canvas id="shader-canvas"></canvas>
 
-  <!-- Main Content -->
-  <section class="relative min-h-screen">
-    <!-- Wave Background -->
-    <div class="wave-container absolute inset-0">
-      <canvas id="canvas" width="1440" height="916"></canvas>
-    </div>
-    
-    <!-- Brandboard Content -->
-    <div class="relative z-20 pt-24 pb-12 px-6">
-      <div class="max-w-7xl mx-auto">
-        
-        <!-- Header -->
-        <div class="text-center mb-12">
-          <h1 class="text-5xl md:text-6xl font-bold text-white tracking-tighter mb-4">
-            Brand
-            <span class="block bg-clip-text text-transparent bg-gradient-to-br from-pink-500 via-rose-500 to-cyan-500">Dashboard</span>
-          </h1>
-          <p class="text-xl text-gray-300 max-w-2xl mx-auto">
-            Manage your brand assets, campaigns, and creative projects all in one place.
-          </p>
+  <!-- Brandboard Content Section -->
+  <section class="relative z-10 min-h-screen flex items-center justify-center pt-12 pb-12 px-6">
+    <div class="max-w-4xl text-center mx-auto">
+      <h1 class="text-5xl md:text-6xl font-bold text-white tracking-tighter mb-6">
+        Your <span
+          class="bg-clip-text text-transparent bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500">Brandboard</span>
+      </h1>
+      <p class="text-xl text-gray-300 leading-relaxed mb-8">
+        Define your brand's core identity, visual style, and messaging.
+      </p>
+
+      <p class="text-xl text-gray-300 leading-relaxed mb-8">
+        There are 3 steps to building your brand board.
+      </p>
+
+      <!-- Process Bar -->
+      <div class="flex justify-between items-center max-w-2xl mx-auto mb-8 bg-gray-700/50 rounded-full p-1">
+        <div id="stepIndicator1"
+          class="step-indicator flex-1 text-center py-2 px-4 rounded-full bg-cyan-600 text-white transition-all duration-300">
+          Brand Voice</div>
+        <div class="w-8 h-1 bg-gray-600 mx-2 rounded-full"></div>
+        <div id="stepIndicator2"
+          class="step-indicator flex-1 text-center py-2 px-4 rounded-full text-gray-400 transition-all duration-300">
+          Typography</div>
+        <div class="w-8 h-1 bg-gray-600 mx-2 rounded-full"></div>
+        <div id="stepIndicator3"
+          class="step-1 flex-1 text-center py-2 px-4 rounded-full text-gray-400 transition-all duration-300">Imagery
         </div>
+      </div>
 
-        <!-- Quick Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-sm hover:border-cyan-500/50 transition-all cursor-pointer">
-            <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center mb-4">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-2">New Campaign</h3>
-            <p class="text-gray-400">Create a new advertising campaign</p>
+      <div class="bg-gray-800/60 border border-gray-700/50 rounded-xl p-8 backdrop-blur-sm shadow-lg text-left">
+        <!-- Step 1: Brand Voice -->
+        <div id="stepContent1" class="step-content">
+          <h2 class="text-3xl font-semibold text-white mb-4">Brand Voice</h2>
+          <p class="text-gray-400 mb-6">First, let's define your brand's core identity.</p>
+
+          <div class="mb-6">
+            <label for="logoUpload" class="block text-gray-300 text-lg font-medium mb-2">Upload Your Logo <span
+                class="text-red-500">*</span></label>
+            <input type="file" id="logoUpload" accept="image/*"
+              class="w-full text-gray-300 bg-gray-700/50 border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors">
+            <p class="text-gray-500 text-sm mt-1">This is a necessary step.</p>
           </div>
 
-          <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-sm hover:border-cyan-500/50 transition-all cursor-pointer">
-            <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-2">Brand Assets</h3>
-            <p class="text-gray-400">Manage logos, colors, and fonts</p>
+          <div class="mb-6">
+            <label for="brandStory" class="block text-gray-300 text-lg font-medium mb-2">Brand Story & Mission:</label>
+            <p class="text-gray-400 text-sm mb-2">Why did you start this business? What problem are you solving? What is
+              your core mission?</p>
+            <textarea id="brandStory"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
           </div>
 
-          <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-sm hover:border-cyan-500/50 transition-all cursor-pointer">
-            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-2">Analytics</h3>
-            <p class="text-gray-400">View campaign performance</p>
+          <div class="mb-6">
+            <label for="brandPersonality" class="block text-gray-300 text-lg font-medium mb-2">Brand Personality &
+              Values:</label>
+            <p class="text-gray-400 text-sm mb-2">Describe your brand's personality (e.g., professional, friendly,
+              innovative). What are your core values?</p>
+            <textarea id="brandPersonality"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
           </div>
-        </div>
 
-        <!-- Recent Projects -->
-        <div class="mb-12">
-          <h2 class="text-3xl font-bold text-white mb-6">Recent Projects</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Project Card 1 -->
-            <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl overflow-hidden backdrop-blur-sm hover:border-cyan-500/50 transition-all">
-              <div class="h-48 bg-gradient-to-br from-pink-500/20 to-cyan-500/20 flex items-center justify-center">
-                <div class="text-center">
-                  <div class="w-16 h-16 bg-gray-700/50 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                  <p class="text-gray-400 text-sm">No image</p>
-                </div>
-              </div>
-              <div class="p-6">
-                <h3 class="text-lg font-semibold text-white mb-2">Summer Campaign</h3>
-                <p class="text-gray-400 text-sm mb-4">Brand promotion for summer collection</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-500">2 days ago</span>
-                  <button class="text-cyan-400 hover:text-cyan-300 text-sm font-medium">View</button>
-                </div>
-              </div>
-            </div>
+          <div class="mb-6">
+            <label for="targetAudience" class="block text-gray-300 text-lg font-medium mb-2">Target Audience:</label>
+            <p class="text-gray-400 text-sm mb-2">Who is your target audience? What are their frustrations? How do you
+              want them to feel?</p>
+            <textarea id="targetAudience"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
+          </div>
 
-            <!-- Project Card 2 -->
-            <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl overflow-hidden backdrop-blur-sm hover:border-cyan-500/50 transition-all">
-              <div class="h-48 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                <div class="text-center">
-                  <div class="w-16 h-16 bg-gray-700/50 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                  <p class="text-gray-400 text-sm">No image</p>
-                </div>
-              </div>
-              <div class="p-6">
-                <h3 class="text-lg font-semibold text-white mb-2">Product Launch</h3>
-                <p class="text-gray-400 text-sm mb-4">New product announcement ads</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-500">1 week ago</span>
-                  <button class="text-cyan-400 hover:text-cyan-300 text-sm font-medium">View</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Project Card 3 -->
-            <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl overflow-hidden backdrop-blur-sm hover:border-cyan-500/50 transition-all">
-              <div class="h-48 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-                <div class="text-center">
-                  <div class="w-16 h-16 bg-gray-700/50 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                  <p class="text-gray-400 text-sm">No image</p>
-                </div>
-              </div>
-              <div class="p-6">
-                <h3 class="text-lg font-semibold text-white mb-2">Brand Guidelines</h3>
-                <p class="text-gray-400 text-sm mb-4">Updated brand identity system</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-500">2 weeks ago</span>
-                  <button class="text-cyan-400 hover:text-cyan-300 text-sm font-medium">View</button>
-                </div>
-              </div>
-            </div>
+          <div class="mb-0">
+            <label for="brandVoiceMessaging" class="block text-gray-300 text-lg font-medium mb-2">Brand Voice &
+              Messaging:</label>
+            <p class="text-gray-400 text-sm mb-2">What tone of voice do you want (e.g., formal, casual)? What key
+              phrases are associated with your brand?</p>
+            <textarea id="brandVoiceMessaging"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
           </div>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-sm text-center">
-            <div class="text-3xl font-bold text-white mb-2">12</div>
-            <div class="text-gray-400 text-sm">Active Campaigns</div>
+        <!-- Step 2: Typography -->
+        <div id="stepContent2" class="step-content hidden">
+          <h2 class="text-3xl font-semibold text-white mb-4">Typography</h2>
+          <p class="text-gray-400 mb-6">Next, let's define the fonts and textual style for your brand.</p>
+
+          <div class="mb-6">
+            <label for="fontFeeling" class="block text-gray-300 text-lg font-medium mb-2">What kind of feeling do you
+              want the fonts to convey?</label>
+            <p class="text-gray-400 text-sm mb-2">e.g., modern, classic, elegant, friendly, professional, minimalist.
+            </p>
+            <textarea id="fontFeeling"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
           </div>
-          <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-sm text-center">
-            <div class="text-3xl font-bold text-white mb-2">48</div>
-            <div class="text-gray-400 text-sm">Brand Assets</div>
+
+          <div class="mb-6">
+            <label for="existingFonts" class="block text-gray-300 text-lg font-medium mb-2">Do you have any fonts in
+              mind already?</label>
+            <p class="text-gray-400 text-sm mb-2">Maybe a font you've seen and liked, or a specific style you prefer?
+            </p>
+            <textarea id="existingFonts"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
           </div>
-          <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-sm text-center">
-            <div class="text-3xl font-bold text-white mb-2">2.4M</div>
-            <div class="text-gray-400 text-sm">Total Impressions</div>
+
+          <div class="mb-0">
+            <label for="fontImagesUpload" class="block text-gray-300 text-lg font-medium mb-2">Upload font images you
+              like (Optional)</label>
+            <input type="file" id="fontImagesUpload" accept="image/*"
+              class="w-full text-gray-300 bg-gray-700/50 border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors">
           </div>
-          <div class="bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-sm text-center">
-            <div class="text-3xl font-bold text-white mb-2">94%</div>
-            <div class="text-gray-400 text-sm">Success Rate</div>
+        </div>
+
+        <!-- Step 3: Imagery and Photography Style -->
+        <div id="stepContent3" class="step-content hidden">
+          <h2 class="text-3xl font-semibold text-white mb-4">Imagery and Photography Style</h2>
+          <p class="text-gray-400 mb-6">Finally, let's define the visual aesthetic of your brand's imagery.</p>
+
+          <div class="mb-6">
+            <label for="moodFeeling" class="block text-gray-300 text-lg font-medium mb-2">What overall mood or feeling
+              do you want your photos to convey?</label>
+            <p class="text-gray-400 text-sm mb-2">Think of adjectives like: bright, moody, clean, organic, authentic,
+              professional, or candid.</p>
+            <textarea id="moodFeeling"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
           </div>
+
+          <div class="mb-6">
+            <label for="subjectFeatures" class="block text-gray-300 text-lg font-medium mb-2">What types of subjects
+              should be featured in your imagery?</label>
+            <p class="text-gray-400 text-sm mb-2">e.g., people, families, homes, architectural details, abstract
+              patterns, nature.</p>
+            <textarea id="subjectFeatures"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
+          </div>
+
+          <div class="mb-6">
+            <label for="photoStyles" class="block text-gray-300 text-lg font-medium mb-2">Are there any specific photo
+              styles you like or dislike?</label>
+            <p class="text-gray-400 text-sm mb-2">e.g., minimalist with white space, or textured and detailed.</p>
+            <textarea id="photoStyles"
+              class="w-full min-h-[100px] max-h-48 resize-y bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors"></textarea>
+          </div>
+
+          <div class="mb-0">
+            <label for="inspirationImagesUpload" class="block text-gray-300 text-lg font-medium mb-2">Upload inspiration
+              photos (Optional)</label>
+            <input type="file" id="inspirationImagesUpload" accept="image/*"
+              class="w-full text-gray-300 bg-gray-700/50 border-gray-600/50 border rounded-lg py-3 px-4 focus:outline-none focus:border-cyan-500 transition-colors">
+          </div>
+        </div>
+
+        <div id="messageBox" class="text-center text-red-400 mb-2 h-6 mt-4"></div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-end mt-8">
+          <button id="prevStepBtn"
+            class="px-6 py-3 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors mr-4 hidden">Previous</button>
+          <button id="nextStepBtn"
+            class="px-6 py-3 rounded-full bg-gradient-to-br from-purple-500 to-rose-500 text-white font-medium hover:opacity-80 transition-opacity">Next</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Login/Signup Modal (same as homepage) -->
+  <!-- Login/Signup Modal Pop-up (Copied from homepage) -->
   <div id="loginModal" class="modal-overlay hidden">
     <div class="modal-content">
       <span id="closeModalBtn" class="modal-close-btn">×</span>
-      <h2 class="text-3xl font-bold text-white mb-6"></h2>
-      <p class="text-gray-300 mb-6" id="modalDescription"></p>
-      
+      <h2 class="text-3xl font-bold text-white mb-6"></h2> <!-- Title updated dynamically -->
+      <p class="text-gray-300 mb-6" id="modalDescription"></p> <!-- Description updated dynamically -->
+
       <div id="modalMessageBox" class="text-center text-red-400 mb-6"></div>
 
       <!-- Login Form -->
       <div id="loginForm">
-        <input type="email" id="modalEmail" placeholder="Email" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
-        <input type="password" id="modalPassword" placeholder="Password" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-6 focus:outline-none focus:border-cyan-500 transition-colors">
-        
-        <button id="modalLoginBtn" class="w-full px-6 py-3 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white font-medium hover:opacity-80 transition-opacity">Log In</button>
+        <input type="email" id="modalEmail" placeholder="Email"
+          class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="password" id="modalPassword" placeholder="Password"
+          class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-6 focus:outline-none focus:border-cyan-500 transition-colors">
+
+        <button id="modalLoginBtn"
+          class="w-full px-6 py-3 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white font-medium hover:opacity-80 transition-opacity">Log
+          In</button>
         <a href="#" id="switchToSignup" class="toggle-link">Don't have an account? Sign Up</a>
       </div>
 
-      <!-- Signup Form -->
+      <!-- Signup Form (Hidden by default) -->
       <div id="signupForm" class="hidden">
-        <input type="email" id="modalSignupEmail" placeholder="Email" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
-        <input type="password" id="modalSignupPassword" placeholder="Password" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
-        <input type="text" id="modalFirstName" placeholder="First Name" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
-        <input type="text" id="modalLastName" placeholder="Last Name" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
-        <input type="text" id="modalBusinessName" placeholder="Business Name (Optional)" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-6 focus:outline-none focus:border-cyan-500 transition-colors">
-        
-        <button id="modalSignupBtn" class="w-full px-6 py-3 rounded-full bg-gray-700/50 text-gray-300 border border-gray-600/50 hover:border-cyan-500 hover:text-white transition-all">Sign Up</button>
+        <input type="email" id="modalSignupEmail" placeholder="Email"
+          class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="password" id="modalSignupPassword" placeholder="Password"
+          class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="text" id="modalFirstName" placeholder="First Name"
+          class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="text" id="modalLastName" placeholder="Last Name"
+          class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="text" id="modalBusinessName" placeholder="Business Name (Optional)"
+          class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-6 focus:outline-none focus:border-cyan-500 transition-colors">
+
+        <button id="modalSignupBtn"
+          class="w-full px-6 py-3 rounded-full bg-gray-700/50 text-gray-300 border border-gray-600/50 hover:border-cyan-500 hover:text-white transition-all">Sign
+          Up</button>
         <a href="#" id="switchToLogin" class="toggle-link">Already have an account? Log In</a>
       </div>
     </div>
@@ -254,7 +396,7 @@
 
   <script type="module">
     // Supabase client import
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
     // Your Supabase project details
     const SUPABASE_URL = 'https://nlmnoxltgkitddcsfvvi.supabase.co';
@@ -262,14 +404,18 @@
 
     // Initialize Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Expose supabase object globally for easier access if needed
     window.supabase = supabase;
 
-    // Get elements
-    const loginToggleButton = document.getElementById('loginToggleButton');
-    const loginStatusElement = document.getElementById('loginStatus');
+    // Get header elements (these are no longer present, but variables are kept for consistency if they were to be re-added)
+    const loginToggleButton = null; // document.getElementById('loginToggleButton');
+    const loginStatusElement = null; // document.getElementById('loginStatus');
+
+    // Get modal elements
     const loginModal = document.getElementById('loginModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
-    const modalMessageBox = document.getElementById('modalMessageBox');
+    const modalMessageBox = document.getElementById('modalMessageBox'); // This is the message box inside the modal
     const modalTitle = document.querySelector('#loginModal h2');
     const modalDescription = document.getElementById('modalDescription');
 
@@ -290,11 +436,12 @@
     const modalSignupBtn = document.getElementById('modalSignupBtn');
     const switchToLoginLink = document.getElementById('switchToLogin');
 
-    // Modal functions
+    // Function to show/hide the modal and set initial form
     function showLoginModal(formType = 'login') {
+      console.log('showLoginModal called, type:', formType);
       if (loginModal) {
         loginModal.classList.remove('hidden');
-        modalMessageBox.textContent = '';
+        modalMessageBox.textContent = ''; // Clear message on open
         if (formType === 'signup') {
           showSignupForm();
         } else {
@@ -304,17 +451,21 @@
     }
 
     function hideLoginModal() {
+      console.log('hideLoginModal called');
       if (loginModal) {
         loginModal.classList.add('hidden');
       }
     }
 
+    // Functions to switch between forms
     function showLoginForm() {
+      console.log('showLoginForm called');
       if (loginForm && signupForm && modalTitle && modalDescription) {
         loginForm.classList.remove('hidden');
         signupForm.classList.add('hidden');
         modalTitle.textContent = 'Log In';
-        modalDescription.textContent = 'Please log in to access your brandboard.';
+        modalDescription.textContent = 'Please log in to send prompts.';
+        // Clear login fields
         modalEmailInput.value = '';
         modalPasswordInput.value = '';
         modalMessageBox.textContent = '';
@@ -322,11 +473,13 @@
     }
 
     function showSignupForm() {
+      console.log('showSignupForm called');
       if (loginForm && signupForm && modalTitle && modalDescription) {
         loginForm.classList.add('hidden');
         signupForm.classList.remove('hidden');
         modalTitle.textContent = 'Sign Up';
-        modalDescription.textContent = 'Create an account to access your brandboard.';
+        modalDescription.textContent = 'Create an account to send prompts.';
+        // Clear signup fields
         modalSignupEmailInput.value = '';
         modalSignupPasswordInput.value = '';
         modalFirstNameInput.value = '';
@@ -336,98 +489,160 @@
       }
     }
 
-    // Authentication handling
+    // Handle initial login/logout from header button (this button is removed)
+    // The authentication check for proceeding with the form will still trigger the modal.
     const handleAuthToggle = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log('handleAuthToggle called (header button removed)');
+      const {data: {session}} = await supabase.auth.getSession();
       if (session) {
+        console.log('User is logged in, attempting to log out...');
         try {
-          await supabase.auth.signOut();
-          console.log('User logged out');
+          const {error} = await supabase.auth.signOut();
+          if (error) {
+            console.error('Logout error:', error.message);
+          } else {
+            console.log('User logged out successfully');
+          }
         } catch (error) {
-          console.error('Error logging out:', error.message);
+          console.error('Unexpected error during logout:', error.message);
         }
       } else {
+        console.log('User is not logged in, showing login modal...');
         showLoginModal('login');
       }
     };
 
-    // Listen for auth state changes
+    // Listen for authentication state changes and update UI
     supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed event:', event, 'session:', session);
       const user = session?.user;
       if (user) {
-        if (loginToggleButton) loginToggleButton.textContent = 'Logout';
-        const displayName = user.user_metadata?.first_name || user.email || user.id;
-        if (loginStatusElement) loginStatusElement.textContent = `Welcome, ${displayName}`;
+        console.log('User is authenticated:', user.id);
+        // loginToggleButton and loginStatusElement are now null, so these lines won't execute
+        // if (loginToggleButton) loginToggleButton.textContent = 'Logout';
+        // const displayName = user.user_metadata?.first_name || user.email || user.id;
+        // if (loginStatusElement) loginStatusElement.textContent = `Welcome, ${displayName}`;
         hideLoginModal();
+
+        // This redirection logic is specific to the homepage.
+        // On the brandboard, we only want to ensure the user is logged in to proceed with the form.
+        // if (event === 'SIGNED_IN' && window.location.pathname === '/') {
+        //   console.log('User signed in on homepage, checking profile for redirection...');
+        //   const { data: profileData, error: profileError } = await supabase
+        //     .from('user_profiles')
+        //     .select('id')
+        //     .eq('id', user.id);
+
+        //   if (profileError) {
+        //     console.error('Error fetching user profile:', profileError.message);
+        //   } else if (!profileData || profileData.length === 0) {
+        //     console.log("User profile not found, redirecting to brandboard.");
+        //     window.location.href = window.location.origin + '/brandboard';
+        //   } else {
+        //     console.log("User profile found, no redirection needed from homepage.");
+        //   }
+        // }
+
       } else {
-        if (loginToggleButton) loginToggleButton.textContent = 'Login';
-        if (loginStatusElement) loginStatusElement.textContent = '';
+        console.log('User is not authenticated.');
+        // loginToggleButton and loginStatusElement are now null, so these lines won't execute
+        // if (loginToggleButton) loginToggleButton.textContent = 'Login';
+        // if (loginStatusElement) loginStatusElement.textContent = '';
       }
+      // Ensure send button state is updated after auth change
+      // This function is not relevant to the brandboard page as it doesn't have a "send" button
+      // if (typeof updateSendButtonState === 'function') {
+      //   updateSendButtonState();
+      // }
     });
 
-    // Event listeners
-    if (loginToggleButton) {
-      loginToggleButton.addEventListener('click', handleAuthToggle);
-    }
+    // Add click listener to the header button (removed)
+    // if (loginToggleButton) {
+    //   loginToggleButton.addEventListener('click', handleAuthToggle);
+    //   console.log('loginToggleButton event listener added.');
+    // } else {
+    //   console.warn('loginToggleButton not found on page load.');
+    // }
 
+    // --- Modal Authentication Logic ---
     if (closeModalBtn) {
       closeModalBtn.addEventListener('click', hideLoginModal);
+      console.log('closeModalBtn event listener added.');
+    } else {
+      console.warn('closeModalBtn not found on page load.');
     }
 
+    // Toggle links
     if (switchToSignupLink) {
       switchToSignupLink.addEventListener('click', (e) => {
         e.preventDefault();
         showSignupForm();
       });
+      console.log('switchToSignupLink event listener added.');
+    } else {
+      console.warn('switchToSignupLink not found on page load.');
     }
-
     if (switchToLoginLink) {
       switchToLoginLink.addEventListener('click', (e) => {
         e.preventDefault();
         showLoginForm();
       });
+      console.log('switchToLoginLink event listener added.');
+    } else {
+      console.warn('switchToLoginLink not found on page load.');
     }
 
     if (modalLoginBtn) {
       modalLoginBtn.addEventListener('click', async () => {
+        console.log('Modal Login button clicked. Attempting signInWithPassword...');
         const email = modalEmailInput.value;
         const password = modalPasswordInput.value;
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const {data, error} = await supabase.auth.signInWithPassword({email, password});
         if (error) {
-          modalMessageBox.textContent = `Error: ${error.message}`;
+          console.error('Supabase signInWithPassword error:', error.message, error.status);
+          modalMessageBox.textContent = `Login Error: ${error.message}`;
           modalMessageBox.classList.remove('text-green-400');
           modalMessageBox.classList.add('text-red-400');
         } else {
+          console.log('Supabase signInWithPassword successful:', data);
           modalMessageBox.textContent = 'Login successful!';
           modalMessageBox.classList.remove('text-red-400');
           modalMessageBox.classList.add('text-green-400');
+          // onAuthStateChange will handle hiding the modal and updating header status
         }
       });
+      console.log('modalLoginBtn event listener added.');
+    } else {
+      console.warn('modalLoginBtn not found on page load.');
     }
 
     if (modalSignupBtn) {
       modalSignupBtn.addEventListener('click', async () => {
+        console.log('Modal Signup button clicked. Attempting signUp...');
         const email = modalSignupEmailInput.value;
         const password = modalSignupPasswordInput.value;
         const firstName = modalFirstNameInput.value;
         const lastName = modalLastNameInput.value;
         const businessName = modalBusinessNameInput.value;
 
+        // Basic validation for required signup fields
         if (!email || !password || !firstName || !lastName) {
+          console.warn('Signup validation failed: Missing required fields.');
           modalMessageBox.textContent = 'Email, Password, First Name, and Last Name are required.';
           modalMessageBox.classList.remove('text-green-400');
           modalMessageBox.classList.add('text-red-400');
           return;
         }
 
+        // Prepare user_metadata for auth.users table
         const userMetadata = {
           first_name: firstName,
           last_name: lastName,
           business_name: businessName || null
         };
 
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
-          email, 
+        const {data: signUpData, error: signUpError} = await supabase.auth.signUp({
+          email,
           password,
           options: {
             data: userMetadata
@@ -435,124 +650,151 @@
         });
 
         if (signUpError) {
-          modalMessageBox.textContent = `Error: ${signUpError.message}`;
+          console.error('Supabase signUp error:', signUpError.message, signUpError.status);
+          modalMessageBox.textContent = `Signup Error: ${signUpError.message}`;
           modalMessageBox.classList.remove('text-green-400');
           modalMessageBox.classList.add('text-red-400');
         } else {
+          console.log('Supabase signUp successful:', signUpData);
+          // If signup is successful and a user object is returned (for immediate sign-in, or after email confirmation)
           if (signUpData.user) {
-            const { error: insertError } = await supabase
-                .from('user_profiles')
-                .insert([
-                    {
-                        id: signUpData.user.id,
-                        first_name: firstName,
-                        last_name: lastName,
-                        business_name: businessName || null
-                    }
-                ]);
+            console.log('User signed up and immediately logged in, attempting to insert profile...');
+            // Insert user profile data into the 'user_profiles' table
+            const {error: insertError} = await supabase
+              .from('user_profiles')
+              .insert([
+                {
+                  id: signUpData.user.id, // Link to auth.users.id
+                  first_name: firstName,
+                  last_name: lastName,
+                  business_name: businessName || null
+                }
+              ]);
 
             if (insertError) {
-                console.error('Error inserting user profile:', insertError.message);
-                modalMessageBox.textContent = `Sign up successful, but profile creation failed: ${insertError.message}. Please check your email to confirm.`;
-                modalMessageBox.classList.remove('text-green-400');
-                modalMessageBox.classList.add('text-red-400');
+              console.error('Error inserting user profile:', insertError.message);
+              modalMessageBox.textContent = `Sign up successful, but profile creation failed: ${insertError.message}. Please check your email to confirm.`;
+              modalMessageBox.classList.remove('text-green-400');
+              modalMessageBox.classList.add('text-red-400');
             } else {
-                modalMessageBox.textContent = 'Sign up successful! Please check your email to confirm.';
-                modalMessageBox.classList.remove('text-red-400');
-                modalMessageBox.classList.add('text-green-400');
+              console.log('User profile inserted successfully.');
+              modalMessageBox.textContent = 'Sign up successful! Please check your email to confirm.';
+              modalMessageBox.classList.remove('text-red-400');
+              modalMessageBox.classList.add('text-green-400');
             }
           } else {
+            console.log('User signed up, but email confirmation is likely required.');
+            // This path is taken if email confirmation is required and user is not immediately signed in
             modalMessageBox.textContent = 'Sign up successful! Please check your email to confirm.';
             modalMessageBox.classList.remove('text-red-400');
             modalMessageBox.classList.add('text-green-400');
           }
         }
       });
+      console.log('modalSignupBtn event listener added.');
+    } else {
+      console.warn('modalSignupBtn not found on page load.');
     }
 
-    // Wave Animation Script (same as homepage)
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas ? canvas.getContext('2d') : null;
+    window.addEventListener('load', function () {
+      const canvas = document.getElementById('shader-canvas');
+      const gl = canvas ? canvas.getContext('webgl') : null;
 
-    let width, height, imageData, data;
-    const SCALE = 2;
-
-    function resizeCanvas() {
-      if (!canvas || !ctx || window.innerWidth === 0 || window.innerHeight === 0) return;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      width = Math.floor(canvas.width / SCALE);
-      height = Math.floor(canvas.height / SCALE);
-      if (width > 0 && height > 0) {
-        imageData = ctx.createImageData(width, height);
-        data = imageData.data;
-      } else {
-        imageData = null;
-        data = null;
-      }
-    }
-
-    if (canvas) {
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
-    }
-
-    let startTime = Date.now();
-    const SIN_TABLE = new Float32Array(1024);
-    const COS_TABLE = new Float32Array(1024);
-    for (let i = 0; i < 1024; i++) {
-      const a = i / 1024 * Math.PI * 2;
-      SIN_TABLE[i] = Math.sin(a);
-      COS_TABLE[i] = Math.cos(a);
-    }
-    const fSin = x => SIN_TABLE[Math.floor((x % (Math.PI * 2)) / (Math.PI * 2) * 1024) & 1023];
-    const fCos = x => COS_TABLE[Math.floor((x % (Math.PI * 2)) / (Math.PI * 2) * 1024) & 1023];
-
-    function render() {
-      if (!ctx || !imageData || !data) {
-        requestAnimationFrame(render);
+      if (!gl) {
+        console.error("WebGL not supported, falling back to CSS background.");
         return;
       }
 
-      const t = (Date.now() - startTime) * .001;
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const uX = (2 * x - width) / height;
-          const uY = (2 * y - height) / height;
-          let a = 0, d = 0;
-          for (let i = 0; i < 4; i++) {
-            a += fCos(i - d + t * .5 - a * uX);
-            d += fSin(i * uY + a);
-          }
-          const wave = (fSin(a) + fCos(d)) * .5;
-          const intensity = .3 + .4 * wave;
-          const base = .1 + .15 * fCos(uX + uY + t * .3);
-          const blue = .2 * fSin(a * 1.5 + t * .2);
-          const purple = .15 * fCos(d * 2 + t * .1);
-          const r = Math.max(0, Math.min(1, base + purple * .8)) * intensity;
-          const g = Math.max(0, Math.min(1, base + blue * .6)) * intensity;
-          const b = Math.max(0, Math.min(1, base + blue * 1.2 + purple * .4)) * intensity;
-          const idx = (y * width + x) * 4;
-          data[idx] = r * 255;
-          data[idx + 1] = g * 255;
-          data[idx + 2] = b * 255;
-          data[idx + 3] = 255;
-        }
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       }
-      ctx.putImageData(imageData, 0, 0);
-      if (SCALE > 1) {
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+      resize();
+      window.addEventListener('resize', resize);
+
+      const vertexShaderSource = `
+            attribute vec2 aPosition;
+            void main() {
+                gl_Position = vec4(aPosition, 0.0, 1.0);
+            }
+        `;
+      const fragmentShaderSource = `
+            precision highp float;
+            uniform float iTime;
+            uniform vec2 iResolution;
+
+            float noise(vec2 p) {
+                return fract(sin(dot(p.xy, vec2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / iResolution.xy;
+                float n = noise(uv * 200.0 + iTime * 1.5) * 0.03;
+                float dist = length(uv - 0.5);
+                float vignette = 1.0 - smoothstep(0.3, 1.0, dist);
+
+                vec3 color = vec3(0.08, 0.1, 0.25);
+
+                float wave1 = sin(iTime * 0.5 + uv.x * 3.0 + uv.y * 2.0) * 0.5 + 0.5;
+                float wave2 = sin(iTime * 0.3 + uv.x * 2.0 - uv.y * 3.0) * 0.5 + 0.5;
+
+                color += vec3(0.2, 0.1, 0.4) * wave1 * 0.3;
+                color += vec3(0.1, 0.3, 0.6) * wave2 * 0.2;
+                color += vec3(0.4, 0.2, 0.6) * (sin(iTime * 0.2 + uv.y * 4.0) * 0.3 + 0.3) * 0.2;
+
+                color += n;
+                color *= vignette;
+
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+      function compileShader(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+        }
+        return shader;
+      }
+      const vertexShader = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
+      const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+      const program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error('Program link error:', gl.getProgramInfoLog(program));
+      }
+      gl.useProgram(program);
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1,
+      ]), gl.STATIC_DRAW);
+      const aPosition = gl.getAttribLocation(program, 'aPosition');
+      gl.enableVertexAttribArray(aPosition);
+      gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+      const iTimeLoc = gl.getUniformLocation(program, 'iTime');
+      const iResLoc = gl.getUniformLocation(program, 'iResolution');
+      function render(time) {
+        gl.uniform1f(iTimeLoc, time * 0.001);
+        gl.uniform2f(iResLoc, canvas.width, canvas.height);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
       }
       requestAnimationFrame(render);
-    }
+    });
 
-    if (canvas && ctx) {
-      setTimeout(() => {
-        render();
-      }, 50);
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      // It's important to call this after all elements are guaranteed to be in the DOM
+      // and after Supabase auth state is potentially resolved.
+      // A small timeout helps ensure all elements are rendered.
+      setTimeout(window.updateSendButtonState, 100);
+    });
   </script>
 
 </body>
+
 </html>
