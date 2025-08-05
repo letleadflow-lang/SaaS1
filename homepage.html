@@ -1,0 +1,626 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Wave Animation Hero • Floating Header</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    .wave-container{position:relative;overflow:hidden;}
+    .wave-container canvas{width:100%!important;height:100%!important;display:block;}
+    /* Custom style to remove default textarea resize handle in some browsers */
+    textarea {
+      resize: none; /* Controlled by JS and Tailwind's resize-y */
+    }
+    /* Style for selected button */
+    .style-btn.selected {
+      border-width: 2px; /* Add a 2px border */
+      border-color: #06b6d4; /* Tailwind cyan-500 */
+      color: white; /* Keep text white for contrast */
+    }
+    /* Overlay for the modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000; /* Ensure it's on top */
+    }
+    .modal-content {
+      position: relative;
+      background-color: #1f2937; /* bg-gray-800 */
+      border: 1px solid #374151; /* border-gray-700 */
+      border-radius: 1rem; /* rounded-xl */
+      padding: 2rem;
+      backdrop-filter: blur(8px); /* backdrop-blur-sm */
+      max-width: 90%;
+      width: 400px;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      color: #9ca3af; /* text-gray-400 */
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .toggle-link {
+      color: #06b6d4; /* Tailwind cyan-500 */
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 1rem;
+      display: block;
+    }
+  </style>
+</head>
+<body class="font-['Inter'] bg-gray-900 overflow-x-hidden">
+
+  <!-- Floating Header -->
+  <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-30 flex bg-gray-800/60 border-gray-700/50 border rounded-full pt-3 pr-6 pb-3 pl-6 backdrop-blur-sm items-center">
+    <span class="text-xl font-medium text-white tracking-tighter">AURA</span>
+    <div class="hidden md:flex ml-10 space-x-8 text-gray-300">
+      <a href="#" class="hover:text-white transition-colors">Features</a>
+      <a href="#" class="hover:text-white transition-colors">About</a>
+      <a href="#" class="hover:text-white transition-colors">Contact</a>
+    </div>
+    <div class="ml-auto flex items-center space-x-6">
+      <span id="loginStatus" class="text-gray-400 text-sm whitespace-nowrap ml-4">Loading...</span>
+      <button id="loginToggleButton" class="px-4 py-2 rounded-full bg-gradient-to-br from-pink-500 to-cyan-500 text-white text-sm font-medium hover:opacity-80 transition-opacity">
+        Login
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative min-h-screen overflow-hidden">
+    <!-- Wave Background -->
+    <div class="wave-container absolute inset-0">
+      <canvas id="canvas" width="1440" height="916" class=""></canvas>
+    </div>
+    
+    <!-- Main Content (Always visible) -->
+    <div id="mainContent" class="relative z-20 flex min-h-screen pr-6 pl-6 items-center justify-center">
+      <div class="max-w-5xl text-center mr-auto ml-auto">
+        
+        <h1 class="md:text-7xl lg:text-8xl text-5xl font-bold text-white tracking-tighter mb-6">
+          Create
+          <span class="block bg-clip-text text-transparent bg-gradient-to-br from-pink-500 via-rose-500 to-cyan-500">Beautiful Ads</span>
+        </h1>
+
+        <p class="max-w-3xl md:text-2xl leading-relaxed text-xl text-gray-300 mr-auto mb-12 ml-auto">Immerse yourself in a world where technology meets artistry. Create, collaborate, and innovate with tools that adapt to your vision.</p>
+
+        <!-- Auto-Resizing Textarea with Send Button -->
+        <div class="relative max-w-lg mx-auto mb-1">
+          <textarea id="promptTextarea" placeholder="Enter your prompt here..." class="w-full min-h-[60px] max-h-48 resize-y bg-gray-800/60 text-white border-gray-700/50 border rounded-3xl py-4 pr-16 pl-6 text-lg backdrop-blur-sm focus:outline-none focus:border-cyan-500 transition-colors overflow-hidden"></textarea>
+          <button id="sendButton" class="absolute right-2 top-1/2 -translate-y-1/2 p-3 text-white bg-gradient-to-br from-pink-500 to-cyan-500 rounded-full hover:opacity-80 transition-opacity">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </div>
+        <!-- End Auto-Resizing Textarea with Send Button -->
+
+        <!-- Message Box for user feedback -->
+        <div id="messageBox" class="text-center text-red-400 mb-2 h-6"></div>
+
+        <!-- Style Selection Buttons -->
+        <div class="flex justify-center gap-2 mb-8">
+          <button id="brandBtn" class="style-btn px-6 py-3 rounded-full bg-gray-800/60 text-gray-300 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500 transition-all">Brand</button>
+          <button id="promotionBtn" class="style-btn px-6 py-3 rounded-full bg-gray-800/60 text-gray-300 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500 transition-all">Promotion</button>
+          <button id="productBtn" class="style-btn px-6 py-3 rounded-full bg-gray-800/60 text-gray-300 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500 transition-all">Product</button>
+        </div>
+        <!-- End Style Selection Buttons -->
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <!-- Your existing buttons/elements can go here if any -->
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <!-- Your existing grid elements can go here if any -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+      <div class="flex flex-col items-center text-gray-400">
+        <!-- Your existing scroll indicator elements can go here if any -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Login/Signup Modal Pop-up -->
+  <div id="loginModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <span id="closeModalBtn" class="modal-close-btn">×</span>
+      <h2 class="text-3xl font-bold text-white mb-6"></h2> <!-- Title updated dynamically -->
+      <p class="text-gray-300 mb-6" id="modalDescription"></p> <!-- Description updated dynamically -->
+      
+      <div id="modalMessageBox" class="text-center text-red-400 mb-6"></div>
+
+      <!-- Login Form -->
+      <div id="loginForm">
+        <input type="email" id="modalEmail" placeholder="Email" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="password" id="modalPassword" placeholder="Password" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-6 focus:outline-none focus:border-cyan-500 transition-colors">
+        
+        <button id="modalLoginBtn" class="w-full px-6 py-3 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 text-white font-medium hover:opacity-80 transition-opacity">Log In</button>
+        <a href="#" id="switchToSignup" class="toggle-link">Don't have an account? Sign Up</a>
+      </div>
+
+      <!-- Signup Form (Hidden by default) -->
+      <div id="signupForm" class="hidden">
+        <input type="email" id="modalSignupEmail" placeholder="Email" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="password" id="modalSignupPassword" placeholder="Password" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="text" id="modalFirstName" placeholder="First Name" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="text" id="modalLastName" placeholder="Last Name" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-4 focus:outline-none focus:border-cyan-500 transition-colors">
+        <input type="text" id="modalBusinessName" placeholder="Business Name (Optional)" class="w-full bg-gray-700/50 text-white border-gray-600/50 border rounded-lg py-3 px-4 mb-6 focus:outline-none focus:border-cyan-500 transition-colors">
+        
+        <button id="modalSignupBtn" class="w-full px-6 py-3 rounded-full bg-gray-700/50 text-gray-300 border border-gray-600/50 hover:border-cyan-500 hover:text-white transition-all">Sign Up</button>
+        <a href="#" id="switchToLogin" class="toggle-link">Already have an account? Log In</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- All JavaScripts moved to the end of the body -->
+  <script type="module">
+    // Supabase client import
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // Your Supabase project details
+    const SUPABASE_URL = 'https://nlmnoxltgkitddcsfvvi.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sbW5veGx0Z2tpdGRkY3NmdnZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MDA0ODcsImV4cCI6MjA2OTk3NjQ4N30.-zSVI3pAJoF8NOSjE_Ell46_xhXyMF3N_NojPJ0xFO0';
+
+    // Initialize Supabase client
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Expose supabase object globally for easier access if needed
+    window.supabase = supabase;
+
+    // Get header elements
+    const loginToggleButton = document.getElementById('loginToggleButton');
+    const loginStatusElement = document.getElementById('loginStatus');
+
+    // Get modal elements
+    const loginModal = document.getElementById('loginModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalMessageBox = document.getElementById('modalMessageBox');
+    const modalTitle = document.querySelector('#loginModal h2');
+    const modalDescription = document.getElementById('modalDescription');
+
+    // Login Form elements
+    const loginForm = document.getElementById('loginForm');
+    const modalEmailInput = document.getElementById('modalEmail');
+    const modalPasswordInput = document.getElementById('modalPassword');
+    const modalLoginBtn = document.getElementById('modalLoginBtn');
+    const switchToSignupLink = document.getElementById('switchToSignup');
+
+    // Signup Form elements
+    const signupForm = document.getElementById('signupForm');
+    const modalSignupEmailInput = document.getElementById('modalSignupEmail');
+    const modalSignupPasswordInput = document.getElementById('modalSignupPassword');
+    const modalFirstNameInput = document.getElementById('modalFirstName');
+    const modalLastNameInput = document.getElementById('modalLastName');
+    const modalBusinessNameInput = document.getElementById('modalBusinessName');
+    const modalSignupBtn = document.getElementById('modalSignupBtn');
+    const switchToLoginLink = document.getElementById('switchToLogin');
+
+    // Function to show/hide the modal and set initial form
+    function showLoginModal(formType = 'login') {
+      if (loginModal) {
+        loginModal.classList.remove('hidden');
+        modalMessageBox.textContent = ''; // Clear message on open
+        if (formType === 'signup') {
+          showSignupForm();
+        } else {
+          showLoginForm();
+        }
+      }
+    }
+
+    function hideLoginModal() {
+      if (loginModal) {
+        loginModal.classList.add('hidden');
+      }
+    }
+
+    // Functions to switch between forms
+    function showLoginForm() {
+      if (loginForm && signupForm && modalTitle && modalDescription) {
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+        modalTitle.textContent = 'Log In';
+        modalDescription.textContent = 'Please log in to send prompts.';
+        // Clear login fields
+        modalEmailInput.value = '';
+        modalPasswordInput.value = '';
+        modalMessageBox.textContent = '';
+      }
+    }
+
+    function showSignupForm() {
+      if (loginForm && signupForm && modalTitle && modalDescription) {
+        loginForm.classList.add('hidden');
+        signupForm.classList.remove('hidden');
+        modalTitle.textContent = 'Sign Up';
+        modalDescription.textContent = 'Create an account to send prompts.';
+        // Clear signup fields
+        modalSignupEmailInput.value = '';
+        modalSignupPasswordInput.value = '';
+        modalFirstNameInput.value = '';
+        modalLastNameInput.value = '';
+        modalBusinessNameInput.value = '';
+        modalMessageBox.textContent = '';
+      }
+    }
+
+    // Handle initial login/logout from header button
+    const handleAuthToggle = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // User is logged in, so log them out
+        try {
+          await supabase.auth.signOut();
+          console.log('User logged out');
+        } catch (error) {
+          console.error('Error logging out:', error.message);
+        }
+      } else {
+        // User is not logged in, show the modal defaulting to login
+        showLoginModal('login');
+      }
+    };
+
+    // Listen for authentication state changes and update UI
+    supabase.auth.onAuthStateChange(async (event, session) => { // Made async to allow await
+      const user = session?.user; // Supabase user object from session
+      if (user) {
+        if (loginToggleButton) loginToggleButton.textContent = 'Logout';
+        // Display first name if available, otherwise email, then ID
+        const displayName = user.user_metadata?.first_name || user.email || user.id;
+        if (loginStatusElement) loginStatusElement.textContent = `Welcome, ${displayName}`;
+        hideLoginModal(); // Hide modal on successful login/session change
+
+        // Redirect to brandboard if on homepage and just signed in
+        if (event === 'SIGNED_IN' && window.location.pathname === '/') {
+          // Check if user profile exists in 'user_profiles' table
+          const { data: profileData, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('id')
+            .eq('id', user.id);
+
+          if (profileError) {
+            console.error('Error fetching user profile:', profileError.message);
+            // Decide how to handle this error. For now, we won't redirect if we can't confirm profile existence.
+          } else if (!profileData || profileData.length === 0) {
+            // No profile found for this user ID, redirect to brandboard
+            console.log("User profile not found, redirecting to brandboard.");
+            window.location.href = '/brandboard';
+          } else {
+            console.log("User profile found, no redirection needed from homepage.");
+          }
+        }
+
+      } else {
+        if (loginToggleButton) loginToggleButton.textContent = 'Login';
+        if (loginStatusElement) loginStatusElement.textContent = ''; // Removed "Not Logged In" text
+      }
+      // Ensure send button state is updated after auth change
+      if (typeof updateSendButtonState === 'function') {
+        updateSendButtonState();
+      }
+    });
+
+    // Add click listener to the header button
+    if (loginToggleButton) {
+      loginToggleButton.addEventListener('click', handleAuthToggle);
+    }
+
+    // --- Modal Authentication Logic ---
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', hideLoginModal);
+    }
+
+    // Toggle links
+    if (switchToSignupLink) {
+      switchToSignupLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSignupForm();
+      });
+    }
+    if (switchToLoginLink) {
+      switchToLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showLoginForm();
+      });
+    }
+
+    if (modalLoginBtn) {
+      modalLoginBtn.addEventListener('click', async () => {
+        const email = modalEmailInput.value;
+        const password = modalPasswordInput.value;
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          modalMessageBox.textContent = `Error: ${error.message}`;
+          modalMessageBox.classList.remove('text-green-400');
+          modalMessageBox.classList.add('text-red-400');
+        } else {
+          modalMessageBox.textContent = 'Login successful!';
+          modalMessageBox.classList.remove('text-red-400');
+          modalMessageBox.classList.add('text-green-400');
+          // onAuthStateChange will handle hiding the modal and redirection
+        }
+      });
+    }
+
+    if (modalSignupBtn) {
+      modalSignupBtn.addEventListener('click', async () => {
+        const email = modalSignupEmailInput.value;
+        const password = modalSignupPasswordInput.value;
+        const firstName = modalFirstNameInput.value;
+        const lastName = modalLastNameInput.value;
+        const businessName = modalBusinessNameInput.value;
+
+        // Basic validation for required signup fields
+        if (!email || !password || !firstName || !lastName) {
+          modalMessageBox.textContent = 'Email, Password, First Name, and Last Name are required.';
+          modalMessageBox.classList.remove('text-green-400');
+          modalMessageBox.classList.add('text-red-400');
+          return;
+        }
+
+        // Prepare user_metadata for auth.users table
+        const userMetadata = {
+          first_name: firstName,
+          last_name: lastName,
+          business_name: businessName || null
+        };
+
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            data: userMetadata
+          }
+        });
+
+        if (signUpError) {
+          modalMessageBox.textContent = `Error: ${signUpError.message}`;
+          modalMessageBox.classList.remove('text-green-400');
+          modalMessageBox.classList.add('text-red-400');
+        } else {
+          // If signup is successful and a user object is returned (for immediate sign-in, or after email confirmation)
+          if (signUpData.user) {
+            // Insert user profile data into the 'user_profiles' table
+            const { error: insertError } = await supabase
+                .from('user_profiles')
+                .insert([
+                    {
+                        id: signUpData.user.id, // Link to auth.users.id
+                        first_name: firstName,
+                        last_name: lastName,
+                        business_name: businessName || null
+                    }
+                ]);
+
+            if (insertError) {
+                console.error('Error inserting user profile:', insertError.message);
+                modalMessageBox.textContent = `Sign up successful, but profile creation failed: ${insertError.message}. Please check your email to confirm.`;
+                modalMessageBox.classList.remove('text-green-400');
+                modalMessageBox.classList.add('text-red-400');
+            } else {
+                modalMessageBox.textContent = 'Sign up successful! Please check your email to confirm.';
+                modalMessageBox.classList.remove('text-red-400');
+                modalMessageBox.classList.add('text-green-400');
+            }
+          } else {
+            // This path is taken if email confirmation is required and user is not immediately signed in
+            modalMessageBox.textContent = 'Sign up successful! Please check your email to confirm.';
+            modalMessageBox.classList.remove('text-red-400');
+            modalMessageBox.classList.add('text-green-400');
+          }
+        }
+      });
+    }
+
+    // --- Homepage Content Script Logic ---
+
+    // Auto-resize textarea script
+    const textarea = document.getElementById('promptTextarea');
+    if (textarea) {
+      textarea.addEventListener('input', () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        updateSendButtonState();
+      });
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    // Style selection logic
+    const styleButtons = document.querySelectorAll('.style-btn');
+    const sendButton = document.getElementById('sendButton');
+    const messageBox = document.getElementById('messageBox');
+    let selectedStyle = null;
+
+    // Function to update the send button's enabled/disabled state
+    window.updateSendButtonState = async function() {
+      const isTextareaPresent = document.getElementById('promptTextarea');
+      const isSendButtonPresent = document.getElementById('sendButton');
+
+      if (!isTextareaPresent || !isSendButtonPresent) {
+        return;
+      }
+
+      const textareaValue = textarea.value.trim();
+      if (selectedStyle && textareaValue !== '') {
+        sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        sendButton.disabled = false;
+      } else {
+        sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+        sendButton.disabled = true;
+      }
+    };
+
+    // Add click listeners to style buttons
+    styleButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.classList.contains('selected')) {
+          button.classList.remove('selected');
+          selectedStyle = null;
+        } else {
+          styleButtons.forEach(btn => btn.classList.remove('selected'));
+          button.classList.add('selected');
+          selectedStyle = button.textContent;
+        }
+        if (messageBox) messageBox.textContent = '';
+        updateSendButtonState();
+      });
+    });
+
+    // Add click listener to the send button
+    if (sendButton) {
+      sendButton.addEventListener('click', async (event) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        const isAuthenticated = session !== null;
+
+        if (!isAuthenticated) {
+          event.preventDefault();
+          showLoginModal('signup'); // Show signup modal first
+          if (messageBox) {
+            messageBox.textContent = 'Please log in to send a prompt.';
+            messageBox.classList.remove('text-green-400');
+            messageBox.classList.add('text-red-400');
+            setTimeout(() => { messageBox.textContent = ''; }, 3000);
+          }
+          return;
+        }
+
+        if (!selectedStyle) {
+          event.preventDefault();
+          if (messageBox) {
+            messageBox.textContent = 'Please select a style (Brand, Promotion, or Product) to send.';
+            messageBox.classList.remove('text-green-400');
+            messageBox.classList.add('text-red-400');
+            setTimeout(() => { messageBox.textContent = ''; }, 3000);
+          }
+        } else if (textarea.value.trim() === '') {
+          event.preventDefault();
+          if (messageBox) {
+            messageBox.textContent = 'Please enter some text in the prompt box to send.';
+            messageBox.classList.remove('text-green-400');
+            messageBox.classList.add('text-red-400');
+            setTimeout(() => { messageBox.textContent = ''; }, 3000);
+          }
+        }
+        else {
+          console.log('Prompt:', textarea.value);
+          console.log('Selected Style:', selectedStyle);
+          if (messageBox) {
+            messageBox.textContent = 'Prompt sent!';
+            messageBox.classList.remove('text-red-400');
+            messageBox.classList.add('text-green-400');
+            setTimeout(() => {
+              messageBox.textContent = '';
+              messageBox.classList.remove('text-green-400');
+              messageBox.classList.add('text-red-400');
+            }, 2000);
+          }
+        }
+      });
+    }
+
+    // Wave Animation Script
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+
+    let width, height, imageData, data;
+    const SCALE = 2;
+
+    function resizeCanvas() {
+      if (!canvas || !ctx || window.innerWidth === 0 || window.innerHeight === 0) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      width = Math.floor(canvas.width / SCALE);
+      height = Math.floor(canvas.height / SCALE);
+      if (width > 0 && height > 0) {
+        imageData = ctx.createImageData(width, height);
+        data = imageData.data;
+      } else {
+        imageData = null;
+        data = null;
+      }
+    }
+
+    if (canvas) {
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+    }
+
+    let startTime = Date.now();
+    const SIN_TABLE = new Float32Array(1024);
+    const COS_TABLE = new Float32Array(1024);
+    for (let i = 0; i < 1024; i++) {
+      const a = i / 1024 * Math.PI * 2;
+      SIN_TABLE[i] = Math.sin(a);
+      COS_TABLE[i] = Math.cos(a);
+    }
+    const fSin = x => SIN_TABLE[Math.floor((x % (Math.PI * 2)) / (Math.PI * 2) * 1024) & 1023];
+    const fCos = x => COS_TABLE[Math.floor((x % (Math.PI * 2)) / (Math.PI * 2) * 1024) & 1023];
+
+    function render() {
+      if (!ctx || !imageData || !data) {
+        requestAnimationFrame(render);
+        return;
+      }
+
+      const t = (Date.now() - startTime) * .001;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const uX = (2 * x - width) / height;
+          const uY = (2 * y - height) / height;
+          let a = 0, d = 0;
+          for (let i = 0; i < 4; i++) {
+            a += fCos(i - d + t * .5 - a * uX);
+            d += fSin(i * uY + a);
+          }
+          const wave = (fSin(a) + fCos(d)) * .5;
+          const intensity = .3 + .4 * wave;
+          const base = .1 + .15 * fCos(uX + uY + t * .3);
+          const blue = .2 * fSin(a * 1.5 + t * .2);
+          const purple = .15 * fCos(d * 2 + t * .1);
+          const r = Math.max(0, Math.min(1, base + purple * .8)) * intensity;
+          const g = Math.max(0, Math.min(1, base + blue * .6)) * intensity;
+          const b = Math.max(0, Math.min(1, base + blue * 1.2 + purple * .4)) * intensity;
+          const idx = (y * width + x) * 4;
+          data[idx] = r * 255;
+          data[idx + 1] = g * 255;
+          data[idx + 2] = b * 255;
+          data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      if (SCALE > 1) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+      }
+      requestAnimationFrame(render);
+    }
+
+    if (canvas && ctx) {
+      setTimeout(() => {
+        render();
+      }, 50);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(updateSendButtonState, 100);
+    });
+  </script>
+
+
+
+</body></html>
